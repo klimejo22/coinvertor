@@ -15,6 +15,7 @@ def convert_currency(c1: str, c2: str, val: float):
     # c2: Druha mena
     # val: Pocet meny
 
+    #slo by zlepsit s db
     response = requests.get(baseUrl + c1).json()
     
     if response["result"] != "success":
