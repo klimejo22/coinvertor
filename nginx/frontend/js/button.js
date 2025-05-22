@@ -55,4 +55,6 @@
         alert("Skibidi spatne")
       }
     });
+
+    console.log("zmena")
   });
