@@ -9,6 +9,12 @@ body {
   align-items: center;
   background: #f3f4f6;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  flex-direction: column; /* Přidáno, aby h1 i converter byly vertikálně vedle sebe */
+}
+
+h1 {
+  margin: 0 0 2rem 0;
+  text-align: center;
 }
 
 .converter {
