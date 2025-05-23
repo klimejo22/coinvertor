@@ -29,17 +29,20 @@ def convert_currency(c1: str, c2: str, val: float):
     # c2: Druha mena
     # val: Pocet meny
 
-    with engine.connect() as connection:
+    with engine.begin() as connection:
         try:
             base_id = connection.execute(
                 text("SELECT id FROM currencies WHERE name = :name"),
                 {"name": c1}
             ).scalar()
-            id_check_result = connection.execute("SELECT id FROM exchange_rates WHERE base_currency_id = :id", {"id" : base_id})
+            id_check_result = connection.execute(
+                text("SELECT id FROM exchange_rates WHERE base_currency_id = :id"),
+                {"id": base_id}
+            )
         except SQLAlchemyError as e:
             return raise_db_error(e, 40)
         if id_check_result.first() is None:
-            if not add_data(c1):
+            if opendata_fail(add_data(c1)):
                 return
         else:
             query = text("""
@@ -77,7 +80,7 @@ def add_data(input_currency: str):
     WHERE c1.name = :input_currency;
     """)
 
-    with engine.connect() as connection:
+    with engine.begin() as connection:
 
         try: 
             result = connection.execute(query, {"input_currency": input_currency})
@@ -105,7 +108,7 @@ def add_data(input_currency: str):
                         })
                     except SQLAlchemyError as e:
                         return raise_db_error(e, 107)
-                connection.commit()
+                # connection.commit()
         #         add_data(input_currency)
         # else:
 
@@ -116,4 +119,4 @@ def add_data(input_currency: str):
         #             "target_currency": row.target_currency,
         #             "rate": row.rate
         #         })
-    return True
+    return {"Result": "Success"}
