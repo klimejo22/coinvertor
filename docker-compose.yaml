@@ -36,7 +36,7 @@ services:
         - ghcr.io/klimejo22/postgres:latest
     image: josefkliment/postgres:latest
     container_name: postgres
-    enviromnent:
+    environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: currencydata   
