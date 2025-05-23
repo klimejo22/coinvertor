@@ -28,6 +28,7 @@ services:
     depends_on:
       - api
       - postgres
+
   postgres:
     build:
       context: ./postgres
@@ -41,7 +42,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: currencydata   
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro 
     ports:
       - "5432:5432"
