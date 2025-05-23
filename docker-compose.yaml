@@ -36,7 +36,7 @@ services:
         - ghcr.io/klimejo22/postgres:latest
     image: josefkliment/postgres:latest
     container_name: postgres
-    enviroment:
+    enviromnent:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: currencydata   
@@ -45,6 +45,6 @@ services:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro 
     ports:
       - "5432:5432"
-      
+
 volumes:
   pgdata:
