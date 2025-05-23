@@ -18,7 +18,7 @@ def opendata_fail(response):
     return response["result"] != "success"
 
 def raise_db_error(e):
-    raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    return {"Result" : "Error" + e}
 
 @app.get("/convert/{c1}/{c2}/{val}")
 def convert_currency(c1: str, c2: str, val: float):
@@ -31,7 +31,7 @@ def convert_currency(c1: str, c2: str, val: float):
             base_id = connection.execute("SELECT id FROM currencies WHERE name = :name", {"name" : c1}).scalar()
             id_check_result = connection.execute("SELECT id FROM exchange_rates WHERE base_currency_id = :id", {"id" : base_id})
         except SQLAlchemyError as e:
-            raise_db_error(e)
+            return raise_db_error(e)
         if id_check_result.first() is None:
             if not add_data(c1):
                 return
@@ -49,10 +49,7 @@ def convert_currency(c1: str, c2: str, val: float):
             try:
                 result = connection.execute(query, {"base_currency_name": c1, "target_currency_name": c2}).scalar()
             except SQLAlchemyError as e:
-                raise_db_error(e)
-
-
-
+                return raise_db_error(e)
 
             return {
                 "Result": "success",
@@ -79,7 +76,7 @@ def add_data(input_currency: str):
         try: 
             result = connection.execute(query, {"input_currency": input_currency})
         except SQLAlchemyError as e:
-            raise_db_error(e)
+            return raise_db_error(e)
         
         if result.first() is None:
             response = requests.get(baseUrl + input_currency).json()
@@ -90,7 +87,7 @@ def add_data(input_currency: str):
                 try:
                     base_id = connection.execute("SELECT id FROM currencies WHERE name = :name", {"name" : input_currency}).scalar()
                 except SQLAlchemyError as e:
-                    raise_db_error(e)
+                    return raise_db_error(e)
 
                 for key, value in response["rates"].items():
                     try:
@@ -101,7 +98,7 @@ def add_data(input_currency: str):
                         "rate": value
                         })
                     except SQLAlchemyError as e:
-                        raise_db_error(e)
+                        return raise_db_error(e)
                 connection.commit()
         #         add_data(input_currency)
         # else:
