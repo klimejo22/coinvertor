@@ -30,17 +30,15 @@ def convert_currency(c1: str, c2: str, val: float):
     # val: Pocet meny
 
     with engine.connect() as connection:
-        try:
-            base_id = connection.execute(
-                text("SELECT id FROM currencies WHERE name = :name"),
-                {"name": c1}
-            ).scalar()
-            id_check_result = connection.execute(
-                text("SELECT id FROM exchange_rates WHERE base_currency_id = :id"),
-                {"id": base_id}
-            )
-        except SQLAlchemyError as e:
-            return raise_db_error(e, 40)
+        base_id = connection.execute(
+            text("SELECT id FROM currencies WHERE name = :name"),
+            {"name": c1}
+        ).scalar()
+        id_check_result = connection.execute(
+            text("SELECT id FROM exchange_rates WHERE base_currency_id = :id"),
+            {"id": base_id}
+        )
+
         if id_check_result.first() is None:
             add_result = add_data(c1)
             if add_result["Result"] != "Success":
@@ -75,32 +73,32 @@ def add_data(input_currency: str):
         response = requests.get(baseUrl + input_currency).json()
         if opendata_fail(response):
             return {"Result": "Currency API failure"}
-        else:
+        
 
+        try:
+            base_id = connection.execute(
+                text("SELECT id FROM currencies WHERE name = :name"),
+                {"name": input_currency}
+            ).scalar()
+        except SQLAlchemyError as e:
+            return raise_db_error(e, 96)
+
+        for key, value in response["rates"].items():
             try:
-                base_id = connection.execute(
+                target_id = connection.execute(
                     text("SELECT id FROM currencies WHERE name = :name"),
-                    {"name": input_currency}
+                    {"name": key}
                 ).scalar()
+                connection.execute(
+                    text("INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (:base_id, :target_id, :rate)"),
+                    {
+                        "base_id": base_id,
+                        "target_id": target_id,
+                        "rate": value
+                    }
+                )
             except SQLAlchemyError as e:
-                return raise_db_error(e, 96)
-
-            for key, value in response["rates"].items():
-                try:
-                    target_id = connection.execute(
-                        text("SELECT id FROM currencies WHERE name = :name"),
-                        {"name": key}
-                    ).scalar()
-                    connection.execute(
-                        text("INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (:base_id, :target_id, :rate)"),
-                        {
-                            "base_id": base_id,
-                            "target_id": target_id,
-                            "rate": value
-                        }
-                    )
-                except SQLAlchemyError as e:
-                    return raise_db_error(e, 107)
-            connection.commit()
+                return raise_db_error(e, 107)
+        connection.commit()
 
     return {"Result": "Success"}

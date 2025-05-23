@@ -2,16 +2,13 @@ FROM python:3.11
 
 WORKDIR /api
 
-COPY . /api
-
 RUN apt-get update && apt-get install -y gcc && \
-    python -m venv /opt/venv && \
-    . /opt/venv/bin/activate && \
-    pip install --upgrade pip && \
-    pip install "fastapi[standard]" requests sqlalchemy psycopg2-binary
+    pip install --upgrade pip
 
-ENV PATH="/opt/venv/bin:$PATH"
+COPY requirements.txt .
 
-EXPOSE 8000
+RUN pip install -r requirements.txt
+
+COPY . .
 
 CMD ["fastapi", "dev", "api.py", "--host", "0.0.0.0"]

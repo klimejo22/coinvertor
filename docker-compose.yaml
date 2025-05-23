@@ -1,5 +1,5 @@
 services:
-  api:
+  api:  # Stejne jako u ps
     build:
       context: ./api
       tags:
@@ -29,8 +29,8 @@ services:
       - api
       - postgres
 
-  postgres:
-    image: postgres
+  postgres: # Pridat health check aby se api nacetlo az po tom co pude ps ready
+    image: postgres:17
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
