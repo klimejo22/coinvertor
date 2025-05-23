@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y gcc && \
     python -m venv /opt/venv && \
     . /opt/venv/bin/activate && \
     pip install --upgrade pip && \
-    pip install "fastapi[standard]" requests
+    pip install "fastapi[standard]" requests sqlalchemy psycopg2-binary
 
 ENV PATH="/opt/venv/bin:$PATH"
 
