@@ -1,4 +1,5 @@
  $(document).ready(function () {
+
     $('#convert').on('click', function () {
 
       const inputValues = [
@@ -17,47 +18,18 @@
 
       if (inputValues[0] != "" && inputValues[1] == "") {
 
-        // console.log("localhost:8000/convert/" + currencyValues[0] + "/" + currencyValues[1] + "/" + inputValues[0])
-
-        // $.get("/api/convert/" + currencyValues[0] + "/" + currencyValues[1] + "/" + inputValues[0], function (data) {
-            
-        //     console.log(data)
-
-        //     if (data.Result == "success") {
-
-        //         $("#amountTo").val(Math.round(parseFloat(data.c2_val) * 1000) / 1000);
-        //         $("#amountFrom").val("")
-
-        //     } else {
-        //         alert("Error 500: " + data.Result)
-        //     }
-
-        // })
         convert(currencyValues[0], currencyValues[1], inputValues[0], "#amountTo", "#amountFrom")
 
       } else if (inputValues[0] == "" && inputValues[1] != ""){
 
-        // console.log("localhost:8000/convert/" + currencyValues[1] + "/" + currencyValues[0] + "/" + inputValues[1])
-
-        // $.get("/api/convert/" + currencyValues[1] + "/" + currencyValues[0] + "/" + inputValues[1], function (data) {
-          
-        //   console.log(data)
-
-        //     if (data.Result == "success") {
-
-        //         $("#amountFrom").val(Math.round(parseFloat(data.c2_val) * 1000) / 1000);
-        //         $("#amountTo").val("")
-
-        //     } else {
-        //         alert("Error 500: " + data.Result)
-        //     }
-        // })
-
         convert(currencyValues[1], currencyValues[0], inputValues[1], "#amountFrom", "#amountTo")
+
       } else {
+
         alert("Skibidi spatne")
+        
       }
+
     });
 
-    console.log("zmena")
   });
