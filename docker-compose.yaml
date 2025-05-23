@@ -2,6 +2,9 @@ services:
   api:
     build:
       context: ./api
+      tags:
+        - josefkliment/api:latest
+        - ghcr.io/josefkliment/api:latest
     image: josefkliment/api:latest
     container_name: api
     ports:
@@ -10,6 +13,9 @@ services:
   frontend:
     build:
       context: ./nginx
+      tags:
+        - josefkliment/frontend:latest
+        - ghcr.io/josefkliment/frontend:latest
     image: josefkliment/frontend:latest
     container_name: frontend
     ports:
