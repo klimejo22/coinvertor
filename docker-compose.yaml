@@ -30,12 +30,7 @@ services:
       - postgres
 
   postgres:
-    build:
-      context: ./postgres
-      tags:
-        - josefkliment/postgres:latest
-        - ghcr.io/klimejo22/postgres:latest
-    image: josefkliment/postgres:latest
+    image: postgres
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
