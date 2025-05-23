@@ -26,3 +26,6 @@ def convert_currency(c1: str, c2: str, val: float):
             "c1_val": response["rates"][c1] * val,
             "c2_val": response["rates"][c2] * val
         }
+    
+# @app.get("/getData")
+# def get_data():
