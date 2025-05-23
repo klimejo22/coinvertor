@@ -45,7 +45,6 @@ services:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro 
     ports:
       - "5432:5432"
-    entrypoint:
-      - 
+      
 volumes:
   pgdata:
