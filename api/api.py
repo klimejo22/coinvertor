@@ -28,7 +28,10 @@ def convert_currency(c1: str, c2: str, val: float):
 
     with engine.connect() as connection:
         try:
-            base_id = connection.execute("SELECT id FROM currencies WHERE name = :name", {"name" : c1}).scalar()
+            base_id = connection.execute(
+                text("SELECT id FROM currencies WHERE name = :name"),
+                {"name": c1}
+            ).scalar()
             id_check_result = connection.execute("SELECT id FROM exchange_rates WHERE base_currency_id = :id", {"id" : base_id})
         except SQLAlchemyError as e:
             return raise_db_error(e)
