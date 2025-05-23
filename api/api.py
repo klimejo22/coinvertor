@@ -18,7 +18,7 @@ def opendata_fail(response):
     return response["result"] != "success"
 
 def raise_db_error(e):
-    return {"Result" : "Error" + e}
+    return {"Result" : "Error" + str(e)}
 
 @app.get("/convert/{c1}/{c2}/{val}")
 def convert_currency(c1: str, c2: str, val: float):
