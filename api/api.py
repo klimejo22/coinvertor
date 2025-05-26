@@ -102,3 +102,7 @@ def add_data(input_currency: str):
         connection.commit()
 
     return {"Result": "Success"}
+
+@app.get("/healthCheck")
+def healthCheck():
+    return {"Status": "API bezi"}
