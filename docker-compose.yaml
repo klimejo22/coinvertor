@@ -1,8 +1,7 @@
 services:
   api:  # Stejne jako u ps
     build:
-      context: .
-      dockerfile: api/Dockerfile
+      context: ./api
       tags:
         - josefkliment/api:latest
         - ghcr.io/klimejo22/api:latest
@@ -15,8 +14,7 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: nginx/Dockerfile
+      context: ./nginx
       tags:
         - josefkliment/frontend:latest
         - ghcr.io/klimejo22/frontend:latest
