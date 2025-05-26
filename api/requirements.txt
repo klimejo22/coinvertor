@@ -2,3 +2,4 @@ fastapi[standard]
 requests
 sqlalchemy
 psycopg2-binary
+prometheus_client

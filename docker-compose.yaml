@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  api:  # Stejne jako u ps
+  api:
     build:
       context: ./api
       tags:
@@ -44,7 +44,7 @@ services:
       retries: 3
       start_period: 5s
 
-  postgres: # Pridat health check aby se api nacetlo az po tom co pude ps ready
+  postgres: 
     image: postgres:17
     container_name: postgres
     environment:
@@ -61,6 +61,38 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+  # Grafana containery
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - default
 
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - default
+    depends_on:
+      - prometheus
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - default
 volumes:
   pgdata:

@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'api_statistika'
+    static_configs:
+      - targets: ['api:8000']

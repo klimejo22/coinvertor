@@ -1,17 +1,30 @@
 # Imports
 from typing import Union
 from fastapi import FastAPI
+from fastapi import Request
 from fastapi import HTTPException
 from pydantic import BaseModel
 import requests
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+import time
+from starlette.responses import Response
 
 
 DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/currencydata"
 baseUrl = "https://open.er-api.com/v6/latest/"
 
 engine = create_engine(DATABASE_URL)
+
+# Prometheus metriky
+REQUEST_COUNT = Counter(
+    "http_requests_total", "Počet HTTP requestů", ["method", "endpoint"]
+)
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds", "Doba trvání HTTP requestů", ["method", "endpoint"]
+)
+
 app = FastAPI()
 
 def opendata_fail(response):
@@ -106,3 +119,23 @@ def add_data(input_currency: str):
 @app.get("/healthCheck")
 def healthCheck():
     return {"Status": "API bezi"}
+
+# Prometheus metriky
+
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    method = request.method
+    path = request.url.path
+
+    start_time = time.time()
+    response = await call_next(request)  # zavolá další vrstvu (tvůj endpoint)
+    duration = time.time() - start_time
+
+    REQUEST_COUNT.labels(method=method, endpoint=path).inc()
+    REQUEST_LATENCY.labels(method=method, endpoint=path).observe(duration)
+
+    return response
+
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
