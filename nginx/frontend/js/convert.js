@@ -1,6 +1,6 @@
-var baseUrl = "/api/convert/"
+var baseUrl = "/api/convert?"
 function convert(c1, c2, val, id1, id2) {
-    var url = baseUrl  + c1 + "/" + c2 + "/" + val
+    var url = baseUrl + "c1="+ c1 + "&c2=" + c2 + "&val=" + val
     console.log(url)
     $.get(url, function (data) {
        console.log(data)

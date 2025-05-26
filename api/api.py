@@ -2,6 +2,7 @@
 from typing import Union
 from fastapi import FastAPI
 from fastapi import Request
+from fastapi import Query
 from fastapi import HTTPException
 from pydantic import BaseModel
 import requests
@@ -36,8 +37,12 @@ def raise_db_error(e, line):
         "Line" : line
     }
 
-@app.get("/convert/{c1}/{c2}/{val}")
-def convert_currency(c1: str, c2: str, val: float):
+@app.get("/convert")
+def convert_currency(
+    c1: str = Query(..., description="Puvodni mena"),
+    c2: str = Query(..., description="Cilova mena"),
+    val: float = Query(..., description="Hodnota k prevodu")
+):
     # c1: Puvodni mena z ktery se prevadi na druhou
     # c2: Druha mena
     # val: Pocet meny
