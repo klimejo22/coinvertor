@@ -8,7 +8,7 @@ loki.source.docker "default" {
   forward_to = [loki.write.default.receiver]
 
   labels = {
-    container = "{{.Name}}"
+    container = "{{.Name}}",
   }
 }
 
@@ -16,9 +16,4 @@ loki.write "default" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }
-}
-
-service {
-  sources  = [loki.source.docker.default]
-  sinks = [loki.write.default]
 }
