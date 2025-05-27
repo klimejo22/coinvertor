@@ -25,6 +25,11 @@ REQUEST_COUNT = Counter(
 REQUEST_LATENCY = Histogram(
     "http_request_duration_seconds", "Doba trvání HTTP requestů", ["method", "endpoint"]
 )
+HTTP_ERRORS = Counter(
+    "http_errors_total", 
+    "Počet HTTP chyb podle status kódu", 
+    ["method", "endpoint", "status_code"]
+)
 
 app = FastAPI()
 
@@ -139,6 +144,9 @@ async def metrics_middleware(request: Request, call_next):
     REQUEST_COUNT.labels(method=method, endpoint=path).inc()
     REQUEST_LATENCY.labels(method=method, endpoint=path).observe(duration)
 
+    if response.status_code >= 400:
+        HTTP_ERRORS.labels(method=method, endpoint=path, status_code=str(response.status_code)).inc()
+        
     return response
 
 @app.get("/metrics")

@@ -67,6 +67,7 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     ports:
       - "9090:9090"
     networks:
@@ -77,22 +78,38 @@ services:
     container_name: grafana
     ports:
       - "3001:3000"
+    volumes:
+      - ./dashboards:/var/lib/grafana/dashboards
+      - ./provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=Abcdef0
     networks:
       - default
     depends_on:
       - prometheus
+      # - loki
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    ports:
-      - "8080:8080"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    networks:
-      - default
+  # loki:
+  #   image: grafana/loki:2.9.3
+  #   container_name: loki
+  #   ports:
+  #     - "3100:3100"
+  #   command: -config.file=/etc/loki/local-config.yaml
+
+  # alloy:
+  #   image: grafana/alloy:latest
+  #   container_name: alloy
+  #   volumes:
+  #     - ./alloy/config.alloy:/etc/alloy/config.yaml
+  #     - /var/log:/var/log:ro
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   ports:
+  #     - "7070:7070"
+  #   command: run /etc/alloy/config.alloy  
+
 volumes:
   pgdata:
+  grafana_data:
+  prometheus_data:
