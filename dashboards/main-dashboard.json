@@ -23,6 +23,50 @@
   "panels": [
     {
       "datasource": {
+        "type": "loki",
+        "uid": "den50eigf77cwd"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "den50eigf77cwd"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=~\".+\"}\r\n",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Docker Logy",
+      "type": "logs"
+    },
+    {
+      "datasource": {
         "type": "prometheus",
         "uid": "fen1voui45wjkd"
       },
