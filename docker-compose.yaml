@@ -26,6 +26,7 @@ services:
     image: josefkliment/frontend:latest
     container_name: frontend
     ports:
+      - "80:80"
       - "443:443"
       - "444:444"
     volumes:
