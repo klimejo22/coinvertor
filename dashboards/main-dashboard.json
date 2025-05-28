@@ -24,7 +24,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "den50eigf77cwd"
+        "uid": "P8E80F9AEF21F6940"
       },
       "fieldConfig": {
         "defaults": {},
@@ -53,7 +53,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "den50eigf77cwd"
+            "uid": "P8E80F9AEF21F6940"
           },
           "direction": "backward",
           "editorMode": "code",
@@ -68,7 +68,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "den50eigf77cwd"
+        "uid": "P8E80F9AEF21F6940"
       },
       "fieldConfig": {
         "defaults": {},
@@ -97,7 +97,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "den50eigf77cwd"
+            "uid": "P8E80F9AEF21F6940"
           },
           "direction": "backward",
           "editorMode": "code",

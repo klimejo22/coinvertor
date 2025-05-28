@@ -2,14 +2,23 @@ discovery.docker "default" {
   host = "unix:///var/run/docker.sock"
 }
 
-loki.source.docker "default" {
-  host    = "unix:///var/run/docker.sock"
+discovery.relabel "logs_integrations_docker" {
   targets = discovery.docker.default.targets
-  forward_to = [loki.write.default.receiver]
 
-  labels = {
-    container = "{{.Name}}",
+  rule {
+    action        = "replace"
+    source_labels = ["__meta_docker_container_name"]
+    target_label  = "container"
+    regex         = "/(.+)"
+    replacement   = "$1"
   }
+}
+
+loki.source.docker "default" {
+  host         = "unix:///var/run/docker.sock"
+  targets      = discovery.docker.default.targets
+  forward_to   = [loki.write.default.receiver]
+  relabel_rules = discovery.relabel.logs_integrations_docker.rules
 }
 
 loki.write "default" {
