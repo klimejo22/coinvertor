@@ -14,6 +14,7 @@ CREATE TABLE exchange_rates (
     FOREIGN KEY (target_currency_id) REFERENCES currencies(id)
 );
 
+-- Insert vsech druhu men
 INSERT INTO currencies (name) VALUES 
 ('EUR'), ('AED'), ('AFN'), ('ALL'), ('AMD'), ('ANG'), ('AOA'), ('ARS'), ('AUD'),
 ('AWG'), ('AZN'), ('BAM'), ('BBD'), ('BDT'), ('BGN'), ('BHD'), ('BIF'), ('BMD'),
