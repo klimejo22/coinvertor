@@ -7,10 +7,10 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="/js/convert.js"></script>
   <script src="/js/button.js"></script>
+  <script src="/js/updateTime.js"></script>
 </head>
 <body>
   <h1>Coinvertor</h1>
-  <!-- dasdasdadsadasdsadasd -->
   <div class="converter">
     <div class="converter-side">
       <select name="currencyFrom" id="currencyFrom">
@@ -347,6 +347,10 @@
       </select>
       <input type="number" id="amountTo" placeholder="Výsledek" min="0"/>
     </div>
+  </div>
+  <!-- Info ikona s tooltipem -->
+  <div class="info-icon" tabindex="0" aria-label="Info o poslední aktualizaci">
+    <span class="tooltip" id="update">Poslední update proveden v </span>
   </div>
 </body>
 </html>
