@@ -1,25 +1,46 @@
-# Imports
+### --- Imports --- ###
+# FastAPI
 from typing import Union
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi import Query
 from fastapi import HTTPException
 from pydantic import BaseModel
+# Requests pro Opendata
 import requests
+# SQLalchemy pro db
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+# Metriky prometheus
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 import time
 from starlette.responses import Response
+# Inspect
 from inspect import currentframe, getframeinfo
+# Sentry
+import sentry_sdk
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
+### --- SENTRY --- ###
+# Bezi na localhost:9000
+sentry_sdk.init(
+    dsn="http://f966485dcfa73e550aa5c6998c490c8e@sentry-self-hosted-nginx-1:80/2",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+    traces_sample_rate=1,
+)
 
+### --- Start fast api --- ###
+app = FastAPI()
+# app = SentryAsgiMiddleware(app)
+
+### --- Postgres --- ###
 DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/currencydata"
-baseUrl = "https://open.er-api.com/v6/latest/"
 
 engine = create_engine(DATABASE_URL)
 
-# Prometheus metriky
+### --- Prometheus metriky --- ###
 REQUEST_COUNT = Counter(
     "http_requests_total", "Počet HTTP requestů", ["method", "endpoint"]
 )
@@ -32,9 +53,22 @@ HTTP_ERRORS = Counter(
     ["method", "endpoint", "status_code"]
 )
 
-update_time = requests.get(baseUrl + "EUR").json()["time_last_update_utc"]
+### --- Opendata --- ###
 
-app = FastAPI()
+baseUrl = "https://open.er-api.com/v6/latest/"
+
+time_data = requests.get(baseUrl + "EUR").json()
+
+# update_time = requests.get(baseUrl + "EUR").json()["time_last_update_utc"]
+# update_timestamp = requests.get(baseUrl + "EUR").json()["time_last_update_unix"]
+
+update_time = (
+    time_data["time_last_update_utc"],
+    time_data["time_last_update_unix"]
+)
+
+### --- Zbytek --- ###
+
 
 def opendata_fail(response):
     return response["result"] != "success"
@@ -45,6 +79,10 @@ def raise_db_error(e, line):
         "Line" : line
     }
 
+@app.get("/testSentry")
+async def test():
+    1 / 0
+     
 @app.get("/convert")
 def convert_currency(
     c1: str = Query(..., description="Puvodni mena"),
@@ -65,7 +103,6 @@ def convert_currency(
             WHERE c1.name = :base_currency_name
             AND c2.name = :target_currency_name;
         """)
-        
         try:
             result = connection.execute(query, {"base_currency_name": c1, "target_currency_name": c2}).scalar()
         except SQLAlchemyError as e:
@@ -79,61 +116,63 @@ def convert_currency(
 
 @app.get("/update")
 def update():
-    with engine.connect() as connection:
-        query = text("SELECT * FROM currencies")
-        response = connection.execute(query).fetchall()
-        for row in response:
-            opendata = requests.get(baseUrl + row[1]).json()
-            query = text("SELECT COUNT(*) FROM exchange_rates WHERE base_currency_id = :id")
-            entries = connection.execute(query, {"id": row[0]}).scalar()
-            target_query = text("SELECT id FROM currencies WHERE name = :name")
-            if entries == 0:
-                insert_query = text("INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (:base_id, :target_id, :rate)")
-                for key, value in opendata["rates"].items():
-                    try:
-                        target_id = connection.execute(
-                            target_query,
-                            {"name": key}
-                        ).scalar()
-                        connection.execute(
-                            insert_query,
-                            {
-                                "base_id": row[0],
-                                "target_id": target_id,
-                                "rate": value
-                            }
-                        )
-                    except SQLAlchemyError as e:
-                        return raise_db_error(e, getframeinfo(currentframe()).lineno)
-                connection.commit()
-            else:
-                update_query = text("""
-                    UPDATE exchange_rates
-                    SET rate = :new_rate
-                    WHERE base_currency_id = :base_id
-                    AND target_currency_id = :target_id
-                """)
-
-                for key, value in opendata["rates"].items():
-                    try:
-                        target_id = connection.execute(
-                            target_query,
-                            {"name": key}
-                        ).scalar()
-                        connection.execute(update_query, {
-                            "new_rate": value,
-                            "base_id": row[0],
-                            "target_id": target_id
-                        })
-                    except SQLAlchemyError as e:
-                        return raise_db_error(e, getframeinfo(currentframe()).lineno)
+    if time.time() >= update_time[1]:
+    
+        with engine.connect() as connection:
+            query = text("SELECT * FROM currencies")
+            response = connection.execute(query).fetchall()
+            for row in response:
+                opendata = requests.get(baseUrl + row[1]).json()
+                query = text("SELECT COUNT(*) FROM exchange_rates WHERE base_currency_id = :id")
+                entries = connection.execute(query, {"id": row[0]}).scalar()
+                target_query = text("SELECT id FROM currencies WHERE name = :name")
+                if entries == 0:
+                    insert_query = text("INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (:base_id, :target_id, :rate)")
+                    for key, value in opendata["rates"].items():
+                        try:
+                            target_id = connection.execute(
+                                target_query,
+                                {"name": key}
+                            ).scalar()
+                            connection.execute(
+                                insert_query,
+                                {
+                                    "base_id": row[0],
+                                    "target_id": target_id,
+                                    "rate": value
+                                }
+                            )
+                        except SQLAlchemyError as e:
+                            return raise_db_error(e, getframeinfo(currentframe()).lineno)
                     connection.commit()
+                else:
+                    update_query = text("""
+                        UPDATE exchange_rates
+                        SET rate = :new_rate
+                        WHERE base_currency_id = :base_id
+                        AND target_currency_id = :target_id
+                    """)
+
+                    for key, value in opendata["rates"].items():
+                        try:
+                            target_id = connection.execute(
+                                target_query,
+                                {"name": key}
+                            ).scalar()
+                            connection.execute(update_query, {
+                                "new_rate": value,
+                                "base_id": row[0],
+                                "target_id": target_id
+                            })
+                        except SQLAlchemyError as e:
+                            return raise_db_error(e, getframeinfo(currentframe()).lineno)
+                        connection.commit()
 
     return {"Result": "Success"}
 
 @app.get("/lastUpdate")
 def lastUptade():
-    return {"Last_Update": update_time}
+    return {"Last_Update": update_time[0]}
 
 @app.get("/healthCheck")
 def healthCheck():

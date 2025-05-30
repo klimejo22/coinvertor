@@ -8,6 +8,9 @@ services:
         - ghcr.io/klimejo22/api:latest
     image: josefkliment/api:latest
     container_name: api
+    networks:
+      - sentry_network
+      - apiproject
     depends_on:
       postgres:
         condition: service_healthy
@@ -40,6 +43,9 @@ services:
         - ghcr.io/klimejo22/frontend:latest
     image: josefkliment/frontend:latest
     container_name: frontend
+    networks:
+      - sentry_network
+      - apiproject
     ports:
       - "80:80"
       - "443:443"
@@ -54,8 +60,8 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "https://localhost:443"]
-      interval: 2s
-      timeout: 1s
+      interval: 5s
+      timeout: 2s
       retries: 3
       start_period: 5s
 
@@ -69,6 +75,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro 
+    networks:
+        - apiproject
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d currencydata -U postgres"]
       interval: 2s
@@ -97,6 +105,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=Abcdef0
     networks:
       - default
+      - apiproject
+
     depends_on:
       - prometheus
       - loki
@@ -125,3 +135,9 @@ volumes:
   grafana_data:
   prometheus_data:
   loki_data:
+
+networks:
+  sentry_network:
+    external: true
+    name: sentry-self-hosted_default
+  apiproject:
