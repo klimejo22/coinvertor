@@ -24,7 +24,7 @@ from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 import os
 ### --- SENTRY --- ###
 # Bezi na localhost:9000
-dsn = f"http://{os.environ['SENTRY_KEY']}@sentry-self-hosted-nginx-1:{os.environ['SENTRY_PORT']}/{os.environ['SENTRY_PROJECT_ID']}"
+dsn = f"http://{os.environ['SENTRY_KEY']}@{os.environ['SENTRY_HOST']}:{os.environ['SENTRY_PORT']}/{os.environ['SENTRY_PROJECT_ID']}"
 sentry_sdk.init(
     dsn=dsn,
     # Add data like request headers and IP for users,
