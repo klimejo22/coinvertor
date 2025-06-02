@@ -11,6 +11,9 @@ services:
     networks:
       - sentry_network
       - apiproject
+    env_file:
+      - envs/postgres.env
+      - envs/api.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,7 +34,7 @@ services:
       '
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/healthCheck"]
-      interval: 5s
+      interval: 3s
       timeout: 2s
       retries: 5
 
@@ -60,7 +63,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "https://localhost:443"]
-      interval: 5s
+      interval: 3s
       timeout: 2s
       retries: 3
       start_period: 5s
@@ -68,10 +71,12 @@ services:
   postgres: 
     image: postgres:17
     container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: currencydata   
+    env_file:
+      - envs/postgres.env
+    # environment:
+    #   POSTGRES_USER: postgres
+    #   POSTGRES_PASSWORD: postgres
+    #   POSTGRES_DB: currencydata   
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro 
@@ -99,10 +104,12 @@ services:
       - ./dashboards:/var/lib/grafana/dashboards
       - ./provisioning:/etc/grafana/provisioning
       - grafana_data:/var/lib/grafana
-    environment:
-      - GF_SERVER_ROOT_URL=https://localhost:444/
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=Abcdef0
+    env_file:
+      - envs/grafana.env
+    # environment:
+    #   - GF_SERVER_ROOT_URL=https://localhost:444/
+    #   - GF_SECURITY_ADMIN_USER=admin
+    #   - GF_SECURITY_ADMIN_PASSWORD=Abcdef0
     networks:
       - default
       - apiproject

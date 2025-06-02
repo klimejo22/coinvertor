@@ -20,11 +20,13 @@ from inspect import currentframe, getframeinfo
 # Sentry
 import sentry_sdk
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-
+# .env
+import os
 ### --- SENTRY --- ###
 # Bezi na localhost:9000
+dsn = f"http://{os.environ['SENTRY_KEY']}@sentry-self-hosted-nginx-1:{os.environ['SENTRY_PORT']}/{os.environ['SENTRY_PROJECT_ID']}"
 sentry_sdk.init(
-    dsn="http://f966485dcfa73e550aa5c6998c490c8e@sentry-self-hosted-nginx-1:80/2",
+    dsn=dsn,
     # Add data like request headers and IP for users,
     # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
     send_default_pii=True,
@@ -36,7 +38,7 @@ app = FastAPI()
 # app = SentryAsgiMiddleware(app)
 
 ### --- Postgres --- ###
-DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/currencydata"
+DATABASE_URL = f"postgresql://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@{os.environ['POSTGRES_HOST']}:{os.environ['POSTGRES_PORT']}/{os.environ['POSTGRES_DB']}"
 
 engine = create_engine(DATABASE_URL)
 
