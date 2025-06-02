@@ -5,7 +5,7 @@ function convert(c1, c2, val, id1, id2) {
     $.get(url, function (data) {
        console.log(data)
 
-        if (data.Result == "success") {
+        if (data.Result == "Success") {
 
             $(id1).val(Math.round(parseFloat(data.c2_val) * 1000) / 1000);
             $(id2).val("")

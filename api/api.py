@@ -59,9 +59,6 @@ baseUrl = "https://open.er-api.com/v6/latest/"
 
 time_data = requests.get(baseUrl + "EUR").json()
 
-# update_time = requests.get(baseUrl + "EUR").json()["time_last_update_utc"]
-# update_timestamp = requests.get(baseUrl + "EUR").json()["time_last_update_unix"]
-
 update_time = (
     time_data["time_last_update_utc"],
     time_data["time_last_update_unix"]
@@ -81,7 +78,7 @@ def raise_db_error(e, line):
 
 @app.get("/testSentry")
 async def test():
-    1 / 0
+    12 / 0
      
 @app.get("/convert")
 def convert_currency(
@@ -109,7 +106,7 @@ def convert_currency(
             return raise_db_error(e, getframeinfo(currentframe()).lineno)
 
     return {
-        "Result": "success",
+        "Result": "Success",
         "c1_val": val,
         "c2_val": result * val
     }
@@ -144,7 +141,6 @@ def update():
                             )
                         except SQLAlchemyError as e:
                             return raise_db_error(e, getframeinfo(currentframe()).lineno)
-                    connection.commit()
                 else:
                     update_query = text("""
                         UPDATE exchange_rates
@@ -166,13 +162,17 @@ def update():
                             })
                         except SQLAlchemyError as e:
                             return raise_db_error(e, getframeinfo(currentframe()).lineno)
-                        connection.commit()
+                        
+            connection.commit()
 
     return {"Result": "Success"}
 
 @app.get("/lastUpdate")
 def lastUptade():
-    return {"Last_Update": update_time[0]}
+    return {
+        "Last_Update": update_time[0],
+        "Timestamp" : update_time[1]
+    }
 
 @app.get("/healthCheck")
 def healthCheck():
